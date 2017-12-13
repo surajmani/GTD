@@ -1,3 +1,4 @@
+/// <reference path="Common.js" />
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,6 +17,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 var app = {
     // Application Constructor
     initialize: function() {
@@ -32,9 +34,33 @@ var app = {
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
-    onDeviceReady: function() {
-        console.log('Received Device Ready Event');
-        console.log('calling setup push');
+    onDeviceReady: function () {
+        
+        Common.Device = device;
+        if (Common.Device.uuid == null)
+        {
+            Common.Device.uuid = "tes1User";
+        }
+        //mAlert.Ini(mAlert.Type.ERROR, 200, 100, 'Error', Common.Device.uuid);
+        //console.log(Common.Device);
+        UserID = Common.GetJsonFromLocal("UserID");
+        if (UserID == null)
+        {
+            var data = { UUID: Common.Device.uuid}
+            Common.Post(data, "task/addUser", function (s, r) {
+                if (s) {
+                    console.log(r);
+                    if (s.status == "FAIL") {
+                        mAlert.Ini(mAlert.Type.ERROR, 200, 100, 'Error', s.error);
+                    }
+                    else {
+                        Common.SetJsonToLocal("UserID", r.id);
+                        UserID = r.id;
+                    }
+                }
+            }, true);
+        }
+        onloadComplete();
         app.setupPush();
     },
     setupPush: function() {
